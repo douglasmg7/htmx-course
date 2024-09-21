@@ -22,7 +22,7 @@ app.get('/', (req, res) => {
       <main>
         <h1>Manage your course goals</h1>
         <section>
-          <form id="goal-form">
+          <form id="goal-form" hx-post="/goal" hx-target="ul" hx-swap="innerHTML">
             <div>
               <label htmlFor="goal">Goal</label>
               <input type="text" id="goal" name="goal" />
@@ -47,5 +47,25 @@ app.get('/', (req, res) => {
   </html>
   `);
 });
+
+app.post('/goal', (req, res)=>{
+    const goal = req.body.goal;
+    console.log(`goal received: ${goal}`);
+    courseGoals.push(goal);
+    // res.send('<li>çlkj</li>');
+    console.log(courseGoals);
+
+    // let temp = courseGoals.map((goal, index) => `<li id="goal-${index}"> <span>${goal}</span> <button>Remove</button> </li>`).join('');
+    // res.send(temp);
+
+    // res.send(courseGoals.map((goal, index) => `<li id="goal-${index}"> <span>${goal}</span> <button>Remove</button> </li>`).join(''));
+
+    res.send(courseGoals.map((goal, index) =>
+        `<li id="goal-${index}"> 
+            <span>${goal}</span> 
+            <button>Remove</button> 
+        </li>`).join(''));
+});
+
 
 app.listen(3000);
