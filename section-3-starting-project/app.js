@@ -35,12 +35,15 @@ app.get('/', (req, res) => {
           </form>
         </section>
         <section>
-          <ul id="goals">
+          <ul id="goals" hx-swap="outerHTML">
           ${courseGoals.map(
-            (goal, index) => `
-            <li id="goal-${index}">
-              <span>${goal}</span>
-              <button>Remove</button>
+            (goal) => `
+            <li id="goal-${goal.id}">
+              <span>${goal.text}</span>
+              <button
+                hx-delete="/goals/${goal.id}" 
+                hx-target="#goal-${goal.id}"
+                >Remove</button>
             </li>
           `
           ).join('')}
@@ -54,14 +57,27 @@ app.get('/', (req, res) => {
 
 app.post('/goals', (req, res) => {
   const goalText = req.body.goal;
-  courseGoals.push(goalText);
+  const id = new Date().getTime().toString();
+  courseGoals.push({text: goalText, id: id});
   // res.redirect('/');
   res.send(`
-    <li id="goal-${courseGoals.length - 1}">
+    <li id="goal-${id}">
       <span>${goalText}</span>
-      <button>Remove</button>
+      <button
+        hx-delete="/goals/${id}" 
+        hx-target="#goal-${id}"
+      >Remove</button>
     </li>
   `);
 });
 
+app.delete('/goals/:id', (req, res)=>{
+    const id = req.params.id;
+    const index = courseGoals.findIndex(goal => goal.id === id);
+    // console.log(`index: ${index}`);
+    // console.log(`courseGoals before slice: ${JSON.stringify(courseGoals)}`);
+    courseGoals.splice(index, 1);
+    // console.log(`courseGoals after  slice: ${JSON.stringify(courseGoals)}`);
+    res.send();
+});
 app.listen(3000);
