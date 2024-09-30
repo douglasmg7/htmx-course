@@ -2,6 +2,18 @@ import express from 'express';
 
 const courseGoals = [];
 
+function renderGoalListItem(id, text) {
+  return `
+  <li>
+    <span>${text}</span>
+    <button
+      hx-delete="/goals/${id}" 
+      hx-target="closest li"
+      >Remove</button>
+  </li>
+  `
+}
+
 const app = express();
 
 app.use(express.urlencoded({ extended: false }));
@@ -26,7 +38,8 @@ app.get('/', (req, res) => {
             id="goal-form" 
             hx-post="/goals" 
             hx-target="#goals"
-            hx-swap="beforeend">
+            hx-swap="beforeend"
+            hx-on::after-request="this.reset()">
             <div>
               <label htmlFor="goal">Goal</label>
               <input type="text" id="goal" name="goal" />
@@ -35,18 +48,11 @@ app.get('/', (req, res) => {
           </form>
         </section>
         <section>
-          <ul id="goals" hx-swap="outerHTML">
-          ${courseGoals.map(
-            (goal) => `
-            <li id="goal-${goal.id}">
-              <span>${goal.text}</span>
-              <button
-                hx-delete="/goals/${goal.id}" 
-                hx-target="#goal-${goal.id}"
-                >Remove</button>
-            </li>
-          `
-          ).join('')}
+          <ul 
+            id="goals" 
+            hx-swap="outerHTML"
+            hx-confirm="Are you sure">
+            ${courseGoals.map((goal) => renderGoalListItem(goal.id, goal.text)).join('')}
           </ul>
         </section>
       </main>
@@ -58,26 +64,18 @@ app.get('/', (req, res) => {
 app.post('/goals', (req, res) => {
   const goalText = req.body.goal;
   const id = new Date().getTime().toString();
-  courseGoals.push({text: goalText, id: id});
+  courseGoals.push({ text: goalText, id: id });
   // res.redirect('/');
-  res.send(`
-    <li id="goal-${id}">
-      <span>${goalText}</span>
-      <button
-        hx-delete="/goals/${id}" 
-        hx-target="#goal-${id}"
-      >Remove</button>
-    </li>
-  `);
+  res.send(renderGoalListItem(id, goalText));
 });
 
-app.delete('/goals/:id', (req, res)=>{
-    const id = req.params.id;
-    const index = courseGoals.findIndex(goal => goal.id === id);
-    // console.log(`index: ${index}`);
-    // console.log(`courseGoals before slice: ${JSON.stringify(courseGoals)}`);
-    courseGoals.splice(index, 1);
-    // console.log(`courseGoals after  slice: ${JSON.stringify(courseGoals)}`);
-    res.send();
+app.delete('/goals/:id', (req, res) => {
+  const id = req.params.id;
+  const index = courseGoals.findIndex(goal => goal.id === id);
+  // console.log(`index: ${index}`);
+  // console.log(`courseGoals before slice: ${JSON.stringify(courseGoals)}`);
+  courseGoals.splice(index, 1);
+  // console.log(`courseGoals after  slice: ${JSON.stringify(courseGoals)}`);
+  res.send();
 });
 app.listen(3000);
