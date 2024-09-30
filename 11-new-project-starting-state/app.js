@@ -19,13 +19,13 @@ app.get('/', (req, res) => {
 });
 
 app.post('/places', (req, res) => {
-  const locationId = req.body.locationId;
+  // const locationId = req.body.locationId;
+  const locationId = req.body.location;
+  // console.log(`req.body.location: ${req.body.location}`);
   const location = AVAILABLE_LOCATIONS.find((loc) => loc.id === locationId);
   INTERESTING_LOCATIONS.push(location);
 
-  res.send(`
-    TODO
-  `);
+  res.send(renderLocation(location));
 });
 
 app.delete('/places/:id', (req, res) => {
